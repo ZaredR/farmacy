@@ -1,0 +1,711 @@
+openapi: 3.0.4
+info:
+  title: API Farmacia ITQ - Sistema de Gestión Integral
+  description: API REST para la gestión de medicamentos, empleados y ventas.
+  version: 1.0.0
+  contact:
+    name: Mauricio Hernández Aguilar
+    email: farmacy@queretaro.tecnm.mx
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Servidor de desarrollo
+  - url: https://api.ecommerce.com/api/v1
+    description: Servidor de producción
+
+tags:
+  - name: medications
+    description: Operaciones de inventario y catálogo de medicinas
+  - name: employees
+    description: Gestión del personal de la farmacia
+  - name: sales
+    description: Registro y trazabilidad de ventas
+
+paths:
+
+#=====================================
+# MEDICATIONS
+#=====================================
+
+  /medications:
+
+    post:
+      summary: Crear nuevo medicamento
+      operationId: createMedication
+      tags:
+        - medications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Medication'
+      responses:
+        '201':
+          description: Medicina creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationResponse'
+        '400':
+          description: Datos inválidos o campos requeridos faltantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Ya existe un medicamento con ese ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: Buscar medicamentos
+      operationId: searchMedications
+      tags:
+        - medications
+      parameters:
+        - name: nombre
+          in: query
+          schema:
+            type: string
+        - name: caducados
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Lista de medicinas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationList'
+        '400':
+          description: Parámetros de búsqueda inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /medications/{medicationId}:
+
+    get:
+      summary: Obtener medicamento por ID
+      operationId: getMedicationById
+      tags:
+        - medications
+      parameters:
+        - name: medicationId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^med-[0-9]+$'
+      responses:
+        '200':
+          description: Medicamento encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationResponse'
+        '400':
+          description: Formato de ID inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Medicamento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      summary: Actualizar medicamento
+      operationId: updateMedication
+      tags:
+        - medications
+      parameters:
+        - name: medicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationPatch'
+      responses:
+        '200':
+          description: Medicamento actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationResponse'
+        '400':
+          description: Datos de actualización inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Medicamento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+#=====================================
+# EMPLOYEES
+#=====================================
+
+  /employees:
+
+    post:
+      summary: Crear nuevo empleado
+      operationId: createEmployee
+      tags:
+        - employees
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Employee'
+      responses:
+        '201':
+          description: Empleado creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeResponse'
+        '400':
+          description: Datos inválidos o campos requeridos faltantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Ya existe un empleado con ese ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /employees/{employeeId}:
+
+    get:
+      summary: Obtener empleado por ID
+      operationId: getEmployeeById
+      tags:
+        - employees
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^emp-[0-9]+$'
+      responses:
+        '200':
+          description: Empleado encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeResponse'
+        '400':
+          description: Formato de ID inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Empleado no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      summary: Actualizar empleado
+      operationId: updateEmployee
+      tags:
+        - employees
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeePatch'
+      responses:
+        '200':
+          description: Empleado actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeResponse'
+        '400':
+          description: Datos de actualización inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Empleado no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Eliminar empleado
+      operationId: deleteEmployee
+      tags:
+        - employees
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Empleado eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteConfirmation'
+        '404':
+          description: Empleado no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+#=====================================
+# SALES
+#=====================================
+
+  /sales:
+
+    post:
+      summary: Registrar nueva venta
+      operationId: createSale
+      tags:
+        - sales
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sale'
+      responses:
+        '201':
+          description: Venta registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleResponse'
+        '400':
+          description: Datos inválidos o campos requeridos faltantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Empleado o cliente referenciado no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Ya existe una venta con ese ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sales/{saleId}:
+
+    get:
+      summary: Obtener venta por ID
+      operationId: getSaleById
+      tags:
+        - sales
+      parameters:
+        - name: saleId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^sale-[0-9]+$'
+      responses:
+        '200':
+          description: Venta encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleResponse'
+        '400':
+          description: Formato de ID inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Venta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      summary: Actualizar venta
+      operationId: updateSale
+      tags:
+        - sales
+      parameters:
+        - name: saleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SalePatch'
+      responses:
+        '200':
+          description: Venta actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleResponse'
+        '400':
+          description: Datos de actualización inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Venta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Eliminar venta
+      operationId: deleteSale
+      tags:
+        - sales
+      parameters:
+        - name: saleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Venta eliminada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteConfirmation'
+        '404':
+          description: Venta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+#=====================================
+# COMPONENTS
+#=====================================
+
+components:
+
+  schemas:
+
+# MEDICATION
+
+    Medication:
+      type: object
+      required:
+        - medicationID
+        - medicationName
+      properties:
+        medicationID:
+          type: string
+          example: med-001
+        medicationName:
+          type: string
+          example: Paracetamol
+        content:
+          type: number
+          example: 500
+        price:
+          type: number
+          example: 120
+        expirationDate:
+          type: string
+          format: date
+        inStock:
+          type: boolean
+
+    MedicationResponse:
+      allOf:
+        - $ref: '#/components/schemas/Medication'
+        - type: object
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    MedicationPatch:
+      type: object
+      properties:
+        medicationName:
+          type: string
+        price:
+          type: number
+        expirationDate:
+          type: string
+          format: date
+
+    MedicationList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicationResponse'
+
+# EMPLOYEE
+
+    Employee:
+      type: object
+      required:
+        - employeeID
+        - employeeName
+      properties:
+        employeeID:
+          type: string
+          example: emp-001
+        employeeName:
+          type: string
+        position:
+          type: string
+          enum:
+            - farmaceutico
+            - cajero
+            - almacenista
+            - gerente
+        shift:
+          type: string
+          enum:
+            - matutino
+            - vespertino
+            - nocturno
+        phone:
+          type: string
+        hireDate:
+          type: string
+          format: date
+
+    EmployeeResponse:
+      allOf:
+        - $ref: '#/components/schemas/Employee'
+        - type: object
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+
+    EmployeePatch:
+      type: object
+      properties:
+        employeeName:
+          type: string
+        shift:
+          type: string
+
+# SALES
+
+    Sale:
+      type: object
+      required:
+        - saleId
+        - saleDate
+        - paymentMethod
+        - quantity
+        - employeeId
+        - clientId
+      properties:
+        saleId:
+          type: string
+          example: sale-001
+        saleDate:
+          type: string
+          format: date
+        paymentMethod:
+          type: string
+          enum:
+            - efectivo
+            - tarjeta
+            - transferencia
+        type:
+          type: string
+          example: mostrador
+        quantity:
+          type: integer
+        employeeId:
+          type: string
+          example: emp-001
+        clientId:
+          type: string
+          example: cli-001
+
+    SaleResponse:
+      allOf:
+        - $ref: '#/components/schemas/Sale'
+        - type: object
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+
+    SalePatch:
+      type: object
+      properties:
+        paymentMethod:
+          type: string
+        quantity:
+          type: integer
+
+# GENERIC
+
+    DeleteConfirmation:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Registro eliminado exitosamente
+
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - error
+        - message
+      properties:
+        status:
+          type: integer
+          example: 404
+          description: Código HTTP del error
+        error:
+          type: string
+          example: Not Found
+          description: Tipo de error
+        message:
+          type: string
+          example: El recurso solicitado no fue encontrado
+          description: Descripción detallada del error
+        path:
+          type: string
+          example: /api/v1/medications/med-999
+          description: Ruta donde ocurrió el error
+        timestamp:
+          type: string
+          format: date-time
+          description: Momento en que ocurrió el error
